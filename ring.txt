@@ -85,8 +85,17 @@ function ring_segment(parameters)
             
             points[points.length] = [(end_shape[vertex])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
             
+        //triangulate
+            triangles[triangles.length] = [points.length - 1 - shape_start.length,
+                                           points.length - 1,
+                                           points.length];
             
+            triangles[triangles.length] = [points.length - 1 - start_shape.length,
+                                           points.length,
+                                           points.length - start_shape.length];
         }
+
+        start_shape = end_shape;
     }
     
     return [points, triangles];
