@@ -5,9 +5,16 @@ var length = 5.34;
 var width = 5.28;
 var depth = 4.13;
 
-var detail = 32;
 
-function ring_band(parameters)
+
+var parameters = {""};
+var instructions = ["r_end", size, "angle_end", 45];
+
+
+var detail = 32;
+var continuity_mode = 1;
+
+function ring_segment(parameters)
 {
     {
         r_start = parameters._start;
@@ -22,16 +29,12 @@ function ring_band(parameters)
         angle_start = parameters.angle_start;
         angle_end = parameters.angle_end;
         
-        position_start = parameters.position_start;
-        position_end = parameters.position_end;
-        
         no_of_segments = parameters.no_of_segments;
     }
     
     r_increment = (r_end - r_start)/no_of_segments;
     offset_increment = (offset_end - offset_start)/no_of_segments;
     angle_increment = (angle_end - angle_start)/no_of_segments;
-    position_increment = (position_end - position_start)/no_of_segments;
     
     {
         end_r = r_start;
@@ -41,8 +44,6 @@ function ring_band(parameters)
         end_shape = shape_start;
         
         end_angle = angle_start;
-        
-        end_position = position_start;
     }
     
     for(var segment = 0; segment < no_of_segments; segment++)
@@ -55,9 +56,6 @@ function ring_band(parameters)
         
         start_angle = end_angle;
         end_angle += angle_increment;
-        
-        start_position = end_position;
-        end_position += position_increment;
         
         start_shape = shape_start;
         
@@ -98,19 +96,63 @@ function main()
 {
     var p;
     var t;
-    for(var i = 0; i < instructions.length; i+=2)
+    
+    for(var i = 0; i+1 < instructions.length; i+=2)
     {
         switch(instructions[i])
         {
-            case "r_end":
+            case "angle_end":
                 
+            parameters.angle_end = instruction[i+1];
+            
+            var model = ring_segment(parameters);
+            
+            //add to lists
+            var j;
+            for(j = 0; j < model[0].length; j++)
+            {
+                p[p.length] = (model[0])[j];
+            }
+            
+            for(j = 0; j < model[1].length; j++)
+            {
+                t[t.length] = (model[1])[j];
+            }
+            
+            //respect continuity mode
+            if(continuity_mode > 0)
+            {
+                r_start = r_end;
+                
+                offset_start = offset_end;
+                
+                angle_start = angle_end;
+                
+                shape_start = shape_end;
+            }
+            
             break;
+            
+            case "set_detail":
+            
+            detail = instruction[i+1];
+            
+            break;
+            
+            case "set_continuity_mode":
+            
+            continuity_mode = instruction[i+1];
+            
+            break;
+            
             
         }
         
     }
     
-    var result = polyhedron({points:p, triangles:t});
+    var result = polyhedron({"points":p, "triangles":t});
+    
+    
     
     return result;
 }
