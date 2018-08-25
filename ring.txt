@@ -5,15 +5,16 @@ var Length = 5.34;
 var width = 5.28;
 var depth = 4.13;
 
+
+var instructions = ["r_end", size, "angle_end", 45];
+
+var detail = 128;
+var continuity_mode = 1;
 var parameters = {  angle_start : 0, andle_end : 90,
                     shape_start : [[1,0],[0,1],[-1,0]], shape_end :  [[1,0],[0,1],[-1,0]],
                     offset_start: 0, offset_end : 0,
                     r_start : size, r_end : size
 };
-var instructions = ["r_end", size, "angle_end", 45];
-
-var detail = 128;
-var continuity_mode = 1;
 
 function ring_segment()
 {
@@ -46,12 +47,20 @@ function ring_segment()
     
     var end_angle = angle_start;
     
-    //generate increment shape
+    //generate increment shape and starting shape
     var shape_increment = [];
-    for(var vertex = 0; vertex < shape_start.length && vertex < end_shape.length; vertex++)
+    var vertex;
+    for(vertex = 0; vertex < shape_start.length && vertex < end_shape.length; vertex++)
     {
-       shape_increment[vertex] = [ ((shape_end[vertex])[0] - (shape_start[vertex])[0])/no_of_segments,
-                                       ((shape_end[vertex])[1] - (shape_start[vertex])[1])/no_of_segments];
+        shape_increment[vertex] = [  (shape_end[vertex][0] - shape_start[vertex][0])/no_of_segments,
+                                     (shape_end[vertex][1] - shape_start[vertex][1])/no_of_segments];
+    }
+    
+    for(vertex = 0; vertex < shape_start.length; vertex++)
+    {
+        shape_start[vertex] = [ shape_start[vertex][0] + offset_start,
+                                cos(angle_start + 90)*(r_start + shape_start[vertex][1]),
+                                sin(angle_start + 90)*(r_start + shape_start[vertex][1])];
     }
     
     //for(var segment = 0; segment < no_of_segments; segment++)
@@ -66,23 +75,23 @@ function ring_segment()
     //    end_angle += angle_increment;
         
         //shape interpolation (and triangulation?)
-        //end_shape[0] = [(start_shape[0])[0] + (shape_increment[0])[0],
-        //               (start_shape[0])[1] + (shape_increment[0])[1]];
+        //end_shape[0] = [shape_start[0][0] + shape_increment[0][0],
+        //               shape_start[0][1] + shape_increment[0][1]];
                         
-        //var end_radius = r_end + (end_shape[0])[1];
+        //var end_radius = r_end + end_shape[0][1];
             
-        //points[points.length] = [(end_shape[0])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
+        //points[points.length] = [end_shape[0][0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
             
             
     //     for( vertex = 1; vertex < start_shape.length && vertex < end_shape.length; vertex++)
     //     {
     //         //generate next vertex
-    //         end_shape[vertex] = [   (start_shape[vertex])[0] + (shape_increment[vertex])[0],
-    //                                 (start_shape[vertex])[1] + (shape_increment[vertex])[1]];
+    //         end_shape[vertex] = [   start_shape[vertex][0] + shape_increment[vertex][0],
+    //                                 start_shape[vertex][1] + shape_increment[vertex][1]];
             
     //         end_radius = r_end + (end_shape[vertex])[1];
             
-    //         points[points.length] = [(end_shape[vertex])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
+    //         points[points.length] = [end_shape[vertex][0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
             
     //     //triangulate
     //         triangles[triangles.length] = [points.length - 1 - shape_start.length,
@@ -97,7 +106,7 @@ function ring_segment()
     //    start_shape = end_shape;
     //}
     
-    return {points: points, triangles: [[0,1,2]]};
+    return {points: shape_start, triangles: [[0,2,1]]};
 }
 
 function main()
