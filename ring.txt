@@ -1,165 +1,165 @@
 var size = 16.1;
 
 //diamond size
-var length = 5.34;
+var Length = 5.34;
 var width = 5.28;
 var depth = 4.13;
 
-
-
-var parameters = {""};
+var parameters = {  angle_start : 0, andle_end : 90,
+                    shape_start : [[1,0],[0,1],[-1,0]], shape_end :  [[1,0],[0,1],[-1,0]],
+                    offset_start: 0, offset_end : 0,
+                    r_start : size, r_end : size
+};
 var instructions = ["r_end", size, "angle_end", 45];
 
-
-var detail = 32;
+var detail = 128;
 var continuity_mode = 1;
 
-function ring_segment(parameters)
+function ring_segment()
 {
+    var points = [];
+    var triangles = [];
+    
+    var r_start = parameters.r_start;
+    var r_end = parameters.r_end;
+    
+    var offset_start = parameters.offset_start;
+    var offset_end = parameters.offset_end;
+    
+    var shape_start = parameters.shape_start;
+    var shape_end = parameters.shape_end;
+        
+    var angle_start = parameters.angle_start;
+    var angle_end = parameters.angle_end;
+    
+    var no_of_segments = (angle_end - angle_start)/360*detail;
+    
+    var r_increment = (r_end - r_start)/no_of_segments;
+    var offset_increment = (offset_end - offset_start)/no_of_segments;
+    var angle_increment = (angle_end - angle_start)/no_of_segments;
+    
+    var end_r = r_start;
+    
+    var end_offset = offset_start;
+    
+    var end_shape = shape_start;
+    
+    var end_angle = angle_start;
+    
+    //generate increment shape
+    var shape_increment = [];
+    for(var vertex = 0; vertex < shape_start.length && vertex < end_shape.length; vertex++)
     {
-        r_start = parameters._start;
-        r_end = parameters.r_end;
-        
-        offset_start = parameters.offset_start;
-        offset_end = parameters.offset_end;
-        
-        shape_start = parameters.shape_start;
-        shape_end = parameters.shape_end;
-        
-        angle_start = parameters.angle_start;
-        angle_end = parameters.angle_end;
-        
-        no_of_segments = parameters.no_of_segments;
+       shape_increment[vertex] = [ ((shape_end[vertex])[0] - (shape_start[vertex])[0])/no_of_segments,
+                                       ((shape_end[vertex])[1] - (shape_start[vertex])[1])/no_of_segments];
     }
     
-    r_increment = (r_end - r_start)/no_of_segments;
-    offset_increment = (offset_end - offset_start)/no_of_segments;
-    angle_increment = (angle_end - angle_start)/no_of_segments;
-    
-    {
-        end_r = r_start;
+    //for(var segment = 0; segment < no_of_segments; segment++)
+    //{
+    //    var start_r = end_r;
+    //    end_r += r_increment;
         
-        end_offset = offset_start;
+    //    var start_offset = end_offset;
+    //    end_offset += offset_increment;
         
-        end_shape = shape_start;
-        
-        end_angle = angle_start;
-    }
-    
-    for(var segment = 0; segment < no_of_segments; segment++)
-    {
-        start_r = end_r;
-        r_end += r_increment;
-        
-        start_offset = end_offset;
-        end_offset += offset_increment;
-        
-        start_angle = end_angle;
-        end_angle += angle_increment;
-        
-        start_shape = shape_start;
-        
-        //generate increment shape
-        for(var vertex = 0; vertex < start_shape.length && vertex < end_shape.length; vertex++)
-        {
-            shape_increment[vertex] = [ ((shape_end[vertex])[0] - (shape_start[vertex])[0])/no_of_segments,
-                                        ((shape_end[vertex])[1] - (shape_start[vertex])[1])/no_of_segments];
-        }
+    //    var start_angle = end_angle;
+    //    end_angle += angle_increment;
         
         //shape interpolation (and triangulation?)
-        end_shape[0] = [(start_shape[0])[0] + (shape_increment[0])[0],
-                        (start_shape[0])[1] + (shape_increment[0])[1]];
+        //end_shape[0] = [(start_shape[0])[0] + (shape_increment[0])[0],
+        //               (start_shape[0])[1] + (shape_increment[0])[1]];
                         
-        var end_radius = r_end + (end_shape[0])[1];
+        //var end_radius = r_end + (end_shape[0])[1];
             
-        points[points.length] = [(end_shape[0])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
+        //points[points.length] = [(end_shape[0])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
             
             
-        for( vertex = 1; vertex < start_shape.length && vertex < end_shape.length; vertex++)
-        {
-            //generate next vertex
-            end_shape[vertex] = [   (start_shape[vertex])[0] + (shape_increment[vertex])[0],
-                                    (start_shape[vertex])[1] + (shape_increment[vertex])[1]];
+    //     for( vertex = 1; vertex < start_shape.length && vertex < end_shape.length; vertex++)
+    //     {
+    //         //generate next vertex
+    //         end_shape[vertex] = [   (start_shape[vertex])[0] + (shape_increment[vertex])[0],
+    //                                 (start_shape[vertex])[1] + (shape_increment[vertex])[1]];
             
-            end_radius = r_end + (end_shape[vertex])[1];
+    //         end_radius = r_end + (end_shape[vertex])[1];
             
-            points[points.length] = [(end_shape[vertex])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
+    //         points[points.length] = [(end_shape[vertex])[0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
             
-        //triangulate
-            triangles[triangles.length] = [points.length - 1 - shape_start.length,
-                                           points.length - 1,
-                                           points.length];
+    //     //triangulate
+    //         triangles[triangles.length] = [points.length - 1 - shape_start.length,
+    //                                       points.length - 1,
+    //                                       points.length];
             
-            triangles[triangles.length] = [points.length - 1 - start_shape.length,
-                                           points.length,
-                                           points.length - start_shape.length];
-        }
+    //         triangles[triangles.length] = [points.length - 1 - start_shape.length,
+    //                                       points.length - start_shape.length,
+    //                                       points.length];
+    //     }
 
-        start_shape = end_shape;
-    }
+    //    start_shape = end_shape;
+    //}
     
-    return [points, triangles];
+    return {points: points, triangles: [[0,1,2]]};
 }
 
 function main()
 {
-    var p;
-    var t;
+    // var p;
+    // var t;
     
-    for(var i = 0; i+1 < instructions.length; i+=2)
-    {
-        switch(instructions[i])
-        {
-            case "angle_end":
+    // for(var i = 0; i+1 < instructions.length; i+=2)
+    // {
+    //     switch(instructions[i])
+    //     {
+    //         case "angle_end":
                 
-            parameters.angle_end = instruction[i+1];
+    //         parameters.angle_end = instructions[i+1];
             
-            var model = ring_segment(parameters);
+    //         var model = ring_segment();
             
-            //add to lists
-            var j;
-            for(j = 0; j < model[0].length; j++)
-            {
-                p[p.length] = (model[0])[j];
-            }
+    //         //add to lists
+    //         var j;
+    //         for(j = 0; j < model[0].length; j++)
+    //         {
+    //             p[p.length] = (model[0])[j];
+    //         }
             
-            for(j = 0; j < model[1].length; j++)
-            {
-                t[t.length] = (model[1])[j];
-            }
+    //         for(j = 0; j < model[1].length; j++)
+    //         {
+    //             t[t.length] = (model[1])[j];
+    //         }
             
-            //respect continuity mode
-            if(continuity_mode > 0)
-            {
-                r_start = r_end;
+    //         //respect continuity mode
+    //         if(continuity_mode > 0)
+    //         {
+    //             r_start = r_end;
                 
-                offset_start = offset_end;
+    //             offset_start = offset_end;
                 
-                angle_start = angle_end;
+    //             angle_start = angle_end;
                 
-                shape_start = shape_end;
-            }
+    //             shape_start = shape_end;
+    //         }
             
-            break;
+    //         break;
             
-            case "set_detail":
+    //         case "set_detail":
             
-            detail = instruction[i+1];
+    //         detail = instructions[i+1];
             
-            break;
+    //         break;
             
-            case "set_continuity_mode":
+    //         case "set_continuity_mode":
             
-            continuity_mode = instruction[i+1];
+    //         continuity_mode = instructions[i+1];
             
-            break;
+    //         break;
             
             
-        }
+    //     }
         
-    }
+    // }
     
-    var result = polyhedron({"points":p, "triangles":t});
+    var model = ring_segment();
+    var result = polyhedron({"points":model.points, "triangles":model.triangles});
     
     
     
