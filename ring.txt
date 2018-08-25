@@ -1,6 +1,6 @@
 var size = 16.1;
 
-//diamond size
+//stone size
 var Length = 5.34;
 var width = 5.28;
 var depth = 4.13;
@@ -39,6 +39,8 @@ function ring_segment()
     
     no_of_segments = ceil(no_of_segments);
     
+    console.log("no_of_segments: " + no_of_segments);
+    
     var r_increment = (r_end - r_start)/no_of_segments;
     var offset_increment = (offset_end - offset_start)/no_of_segments;
     var angle_increment = (angle_end - angle_start)/no_of_segments;
@@ -47,7 +49,7 @@ function ring_segment()
     
     var end_offset = offset_start;
     
-    var end_shape = [];
+    var end_shape = shape_start;
     
     var end_angle = angle_start;
     
@@ -137,6 +139,9 @@ function main()
             case "make segment":
             
             var model = ring_segment();
+            
+            console.log(model.points.length);
+            console.log(model.triangles.length);
             
             //add to lists
             var j;
