@@ -54,10 +54,12 @@ function ring_segment()
     
     for(vertex = 0; vertex < shape_start.length; vertex++)
     {
-        p[p.length] = [ shape_start[vertex][0] + offset_start,
+        p[p.length] = [ shape_start[vertex][0] + end_offset,
                         cos(end_angle + 90)*(end_r + shape_start[vertex][1]),
                         sin(end_angle + 90)*(end_r + shape_start[vertex][1])];
     }
+    
+    var start_shape = shape_start;
     
     for(var segment = 0; segment < no_of_segments; segment++)
     {
@@ -70,12 +72,12 @@ function ring_segment()
         var start_angle = end_angle;
         end_angle += angle_increment;
         
-        //shape interpolation (and triangulation?)
-        for( vertex = 0; vertex < shape_start.length && vertex < end_shape.length; vertex++)
+        //shape interpolation
+        for( vertex = 0; vertex < start_shape.length && vertex < end_shape.length; vertex++)
         {
             //generate next vertex
-            end_shape[vertex] = [  shape_start[vertex][0] + shape_increment[vertex][0],
-                                   shape_start[vertex][1] + shape_increment[vertex][1]];
+            end_shape[vertex] = [  start_shape[vertex][0] + shape_increment[vertex][0],
+                                   start_shape[vertex][1] + shape_increment[vertex][1]];
             
             p[p.length] = [ end_shape[vertex][0] + end_offset,
                             cos(end_angle + 90)*(end_r + end_shape[vertex][1]),
@@ -84,26 +86,26 @@ function ring_segment()
             //triangulate
             if(vertex !== 0)
             {
-                t[t.length] = [ p.length - 2 - shape_start.length,
+                t[t.length] = [ p.length - 2 - start_shape.length,
                                 p.length - 2,
                                 p.length - 1];
             
-                t[t.length] = [ p.length - 2 - shape_start.length,
+                t[t.length] = [ p.length - 2 - start_shape.length,
                                 p.length - 1,
-                                p.length - 1 - shape_start.length];
+                                p.length - 1 - start_shape.length];
             }
         }
         
         //cap underside
-        t[t.length] = [ p.length - end_shape.length - shape_start.length,
+        t[t.length] = [ p.length - end_shape.length - start_shape.length,
                         p.length - 1,
                         p.length - end_shape.length];
                                         
-        t[t.length] = [ p.length - end_shape.length - shape_start.length,
+        t[t.length] = [ p.length - end_shape.length - start_shape.length,
                         p.length - end_shape.length -1,
                         p.length - 1];
 
-        shape_start = end_shape;
+        start_shape = end_shape;
     }
     
     return {points: p, triangles: t};
