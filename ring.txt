@@ -10,10 +10,10 @@ var instructions = ["r_end", size, "angle_end", 45];
 
 var detail = 128;
 var continuity_mode = 1;
-var parameters = {  angle_start : 0, andle_end : 90,
-                    shape_start : [[1,0],[0,1],[-1,0]], shape_end :  [[1,0],[0,1],[-1,0]],
-                    offset_start: 0, offset_end : 0,
-                    r_start : size, r_end : size
+var parameters = {  angle_start: 30, angle_end: 330,
+                    shape_start: [[1,0],[0,1],[-1,0]], shape_end:  [[1,0],[0,1],[-1,0]],
+                    offset_start: -2.5, offset_end: 2.5,
+                    r_start: size, r_end: size
 };
 
 function ring_segment()
@@ -47,9 +47,10 @@ function ring_segment()
     
     var end_angle = angle_start;
     
+    var vertex;
+    
     //generate increment shape and starting shape
     var shape_increment = [];
-    var vertex;
     for(vertex = 0; vertex < shape_start.length && vertex < end_shape.length; vertex++)
     {
         shape_increment[vertex] = [  (shape_end[vertex][0] - shape_start[vertex][0])/no_of_segments,
@@ -58,55 +59,59 @@ function ring_segment()
     
     for(vertex = 0; vertex < shape_start.length; vertex++)
     {
-        shape_start[vertex] = [ shape_start[vertex][0] + offset_start,
+        points[points.length] = [ shape_start[vertex][0] + offset_start,
                                 cos(angle_start + 90)*(r_start + shape_start[vertex][1]),
                                 sin(angle_start + 90)*(r_start + shape_start[vertex][1])];
     }
     
-    //for(var segment = 0; segment < no_of_segments; segment++)
-    //{
-    //    var start_r = end_r;
-    //    end_r += r_increment;
+    for(var segment = 0; segment < no_of_segments; segment++)
+    {
+        var start_r = end_r;
+        end_r += r_increment;
         
-    //    var start_offset = end_offset;
-    //    end_offset += offset_increment;
+        var start_offset = end_offset;
+        end_offset += offset_increment;
         
-    //    var start_angle = end_angle;
-    //    end_angle += angle_increment;
+        var start_angle = end_angle;
+        end_angle += angle_increment;
         
         //shape interpolation (and triangulation?)
-        //end_shape[0] = [shape_start[0][0] + shape_increment[0][0],
-        //               shape_start[0][1] + shape_increment[0][1]];
-                        
-        //var end_radius = r_end + end_shape[0][1];
+        for( vertex = 0; vertex < shape_start.length && vertex < end_shape.length; vertex++)
+        {
+            //generate next vertex
+            end_shape[vertex] = [  shape_start[vertex][0] + shape_increment[vertex][0],
+                                   shape_start[vertex][1] + shape_increment[vertex][1]];
             
-        //points[points.length] = [end_shape[0][0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
+            points[points.length] = [   end_shape[vertex][0] + end_offset,
+                                        cos(end_angle + 90)*(end_r + end_shape[vertex][1]),
+                                        sin(end_angle + 90)*(end_r + end_shape[vertex][1])];
             
+            //triangulate
+            if(vertex !== 0)
+            {
+                triangles[triangles.length] = [ points.length - 2 - shape_start.length,
+                                                points.length - 2,
+                                                points.length - 1];
             
-    //     for( vertex = 1; vertex < start_shape.length && vertex < end_shape.length; vertex++)
-    //     {
-    //         //generate next vertex
-    //         end_shape[vertex] = [   start_shape[vertex][0] + shape_increment[vertex][0],
-    //                                 start_shape[vertex][1] + shape_increment[vertex][1]];
-            
-    //         end_radius = r_end + (end_shape[vertex])[1];
-            
-    //         points[points.length] = [end_shape[vertex][0], cos(end_angle + 90)*end_radius, sin(end_angle + 90)*end_radius];
-            
-    //     //triangulate
-    //         triangles[triangles.length] = [points.length - 1 - shape_start.length,
-    //                                       points.length - 1,
-    //                                       points.length];
-            
-    //         triangles[triangles.length] = [points.length - 1 - start_shape.length,
-    //                                       points.length - start_shape.length,
-    //                                       points.length];
-    //     }
+                triangles[triangles.length] = [ points.length - 2 - shape_start.length,
+                                                points.length - 1,
+                                                points.length - 1 - shape_start.length];
+            }
+        }
+        
+        //cap underside
+        triangles[triangles.length] = [ points.length - end_shape.length - shape_start.length,
+                                        points.length - 1,
+                                        points.length - end_shape.length];
+                                        
+        triangles[triangles.length] = [ points.length - end_shape.length - shape_start.length,
+                                        points.length - end_shape.length -1,
+                                        points.length - 1];
 
-    //    start_shape = end_shape;
-    //}
+        shape_start = end_shape;
+    }
     
-    return {points: shape_start, triangles: [[0,2,1]]};
+    return {points: points, triangles: triangles};
 }
 
 function main()
