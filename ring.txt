@@ -8,20 +8,22 @@ var depth = 4.13;
 var regular_shape = 0;
 
 
-var instructions = ["make segment", 0,
+var instructions = ["scale_end", [0.5, 0.5],
+                    "make_segment", 0,
                     "angle_end", 90,
-                    "offset_end", 0,
-                    "make segment", 0,
-                    // "scale_end", [0,0],
-                    // "angle_end", 335,
-                    // "make segment", 0
+                    "offset_end", 2.5,
+                    "make_segment", 0,
+                    "scale_end", [0.1,0.1],
+                    "scale_start", [1,1],
+                    "angle_end", 95,
+                    "make_segment", 0
                     ];
 
 var detail = 64;
 var continuity_mode = 1;
 var angle_start = 25;
 var angle_end = 30;
-var shape_start = [[2.5,0],[1.35,1.75],[0,2.5],[-1.25,1.75],[-2.5,0]];
+var shape_start = [[2.5,0],[1.5,1.75],[0,2.5],[-1.25,1.75],[-2.5,0]];
 var shape_end = [[2.5,0],[1.35,1.75],[0,2.5],[-1.25,1.75],[-2.5,0]];
 var offset_start = -2.5;
 var offset_end = -2.5;
@@ -47,8 +49,8 @@ function segment()
     
     var end_offset = offset_start;
     
-    var start_shape = shape_start.slice();
-    var end_shape = shape_end.slice();
+    var start_shape = Array.from(shape_start);
+    var end_shape = shape_end.splice();
     
     var end_angle = angle_start;
     
@@ -60,11 +62,11 @@ function segment()
     {
         console.log(" end_shape[vertex]: [" + end_shape[vertex][0] + " , " + end_shape[vertex][1] + "]");
 
-        start_shape[vertex][0] = shape_start[vertex][0] * scale_start[0];
-        start_shape[vertex][1] = shape_start[vertex][1] * scale_start[1];
+        start_shape[vertex][0] = start_shape[vertex][0] * scale_start[0];
+        start_shape[vertex][1] = start_shape[vertex][1] * scale_start[1];
         
-        end_shape[vertex][0] = shape_end[vertex][0] * scale_end[0];
-        end_shape[vertex][1] = shape_end[vertex][1] * scale_end[1];
+        end_shape[vertex][0] = end_shape[vertex][0] * scale_end[0];
+        end_shape[vertex][1] = end_shape[vertex][1] * scale_end[1];
         
         console.log(" shape_end[vertex]: [" + shape_end[vertex][0] + " , " + shape_end[vertex][1] + "]");
         
@@ -120,7 +122,7 @@ function segment()
                         p.length - end_shape.length -1,
                         p.length - 1];
 
-        start_shape = end_shape.slice();
+        start_shape = Array.from(end_shape);
     }
     
     return {points: p, triangles: t};
@@ -135,7 +137,7 @@ function main()
     {
         switch(instructions[i])
         {
-            case "make segment":
+            case "make_segment":
             
             var model = segment();
             
@@ -166,9 +168,9 @@ function main()
                 
                 angle_start = angle_end;
                 
-                shape_start = shape_end;
+                shape_start = Array.from(shape_end);
                 
-                scale_start = scale_end;
+                scale_start = [scale_end[0], scale_end[1]];
             }
             
             break;
