@@ -5,11 +5,11 @@ var Length = 5.34;
 var width = 5.28;
 var depth = 4.13;
 
-var regular_shape = [[2.5,0],[1.35,1.75],[0,2.5],[-1.25,1.75],[-2.5,0]];
+var regular_shape = 0;
 
 
 var instructions = ["make segment", 0,
-                    "angle_end", 180,
+                    "angle_end", 90,
                     "offset_end", 0,
                     "make segment", 0,
                     // "scale_end", [0,0],
@@ -21,8 +21,8 @@ var detail = 64;
 var continuity_mode = 1;
 var angle_start = 25;
 var angle_end = 30;
-var shape_start = regular_shape;
-var shape_end = regular_shape;
+var shape_start = [[2.5,0],[1.35,1.75],[0,2.5],[-1.25,1.75],[-2.5,0]];
+var shape_end = [[2.5,0],[1.35,1.75],[0,2.5],[-1.25,1.75],[-2.5,0]];
 var offset_start = -2.5;
 var offset_end = -2.5;
 var scale_start = [0,0];
@@ -30,7 +30,7 @@ var scale_end = [1,1];
 var r_start = size;
 var r_end = size;
 
-function ring_segment()
+function segment()
 {
     var p = [];
     var t = [];
@@ -47,8 +47,8 @@ function ring_segment()
     
     var end_offset = offset_start;
     
-    var start_shape = shape_start;
-    var end_shape = shape_end;
+    var start_shape = shape_start.slice();
+    var end_shape = shape_end.slice();
     
     var end_angle = angle_start;
     
@@ -58,15 +58,15 @@ function ring_segment()
     var shape_increment = [];
     for(vertex = 0; vertex < shape_start.length && vertex < shape_end.length; vertex++)
     {
-        console.log(“[“ + end_shape[vertex][0] + “ , ” + end_shape[vertex][1] + “]”);
+        console.log(" end_shape[vertex]: [" + end_shape[vertex][0] + " , " + end_shape[vertex][1] + "]");
 
-        // start_shape[vertex][0] = shape_start[vertex][0] * scale_start[0];
+        start_shape[vertex][0] = shape_start[vertex][0] * scale_start[0];
         start_shape[vertex][1] = shape_start[vertex][1] * scale_start[1];
         
-        // end_shape[vertex][0] = shape_end[vertex][0] * scale_end[0];
+        end_shape[vertex][0] = shape_end[vertex][0] * scale_end[0];
         end_shape[vertex][1] = shape_end[vertex][1] * scale_end[1];
         
-        console.log("scale_end: " + scale_end[1] + " end_shape[vertex]: " + end_shape[vertex][1]);
+        console.log(" shape_end[vertex]: [" + shape_end[vertex][0] + " , " + shape_end[vertex][1] + "]");
         
         shape_increment[vertex] = [  (end_shape[vertex][0] - start_shape[vertex][0])/no_of_segments,
                                      (end_shape[vertex][1] - start_shape[vertex][1])/no_of_segments];
@@ -74,11 +74,9 @@ function ring_segment()
     
     for(vertex = 0; vertex < shape_start.length; vertex++)
     {
-        start_shape[vertex] = [ shape_start[vertex][0] + end_offset,
-                                cos(angle_start + 90)*(r_start + shape_start[vertex][1]),
-                                sin(angle_start + 90)*(r_start + shape_start[vertex][1])];
-                        
-        p[p.length] = start_shape[vertex];
+        p[p.length] = [ start_shape[vertex][0] + end_offset,
+                        cos(angle_start + 90)*(r_start + start_shape[vertex][1]),
+                        sin(angle_start + 90)*(r_start + start_shape[vertex][1])];
     }
     
     for(var segment = 0; segment < no_of_segments; segment++)
@@ -122,7 +120,7 @@ function ring_segment()
                         p.length - end_shape.length -1,
                         p.length - 1];
 
-        start_shape = end_shape;
+        start_shape = end_shape.slice();
     }
     
     return {points: p, triangles: t};
@@ -139,7 +137,7 @@ function main()
         {
             case "make segment":
             
-            var model = ring_segment();
+            var model = segment();
             
             console.log(model.points.length);
             console.log(model.triangles.length);
